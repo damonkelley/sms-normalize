@@ -192,7 +192,7 @@ class TestMergeCommonRecords:
         '4125425345',
         '+49231971134',
         '+12129876543',
-        ' Message B.'
+        'Message B.'
     ]
 
     test_data3 = [
