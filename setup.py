@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='GoButler-Challenge',
@@ -8,8 +8,7 @@ setup(
     author='Damon Kelley',
     author_email='damon.kelley@gmail.com',
     url='https://github.com/damonkelley/gobutler-challenge',
-    license='MIT',
-    packages=find_packages(exclude=["tests.*", "tests"]),
+    py_modules=['challenge'],
     include_package_data=True,
     description='CSV SMS records to JSON',
     install_requires=['phonenumbers', 'python-dateutil'],
