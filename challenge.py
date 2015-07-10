@@ -76,7 +76,7 @@ def is_valid_phonenumber(phonenumber):
 def normalize_phonenumber(phonenumber):
     """Normalize a phone number.
 
-    Returns a phone number in the form of <country code><nationalnumber>.
+    Returns a phone number in the form of <country code><national number>.
 
     Example:
         (212) 234-2332 -> 12122342332
@@ -97,7 +97,7 @@ def normalize_datetime(datestring):
     DateTimeParseError is raised if datestring is malformed.
 
     Arguments:
-        - datestring - a valid datetime datestring.
+        datestring - a valid datetime datestring.
     """
     try:
         dateobj = dateutil.parse(datestring)
@@ -131,25 +131,34 @@ class RecordType(object):
         self.datetime = self._get_datetime()
 
     def _phonenumber(self, index):
+        """Get and parse the phone phone number at the given index."""
         number = self.data[index]
         return normalize_phonenumber(number)
 
     def _get_datetime(self):
+        """Get and parse the datestring using the datetime_index."""
         return normalize_datetime(self.data[self.datetime_index])
 
     def _get_id(self):
+        """Get the ID from using the id_index."""
         return self.data[self.id_index]
 
     def _get_sender(self):
+        """Get and parse the phone number using the sender_index."""
         return self._phonenumber(self.sender_index)
 
     def _get_receiver(self):
+        """Get and parse the phone number using the receiver_index."""
         return self._phonenumber(self.receiver_index)
 
     def _get_message(self):
+        """Get and normalize the message using the message_index."""
         return ','.join(self.data[self.message_index])
 
     def __add__(self, other):
+        """Concatenate the message attributes when to Records
+        are added together.
+        """
         self.message = '{} {}'.format(self.message, other.message)
         return self
 
@@ -159,6 +168,11 @@ class RecordType(object):
 
 
 class RecordTypeA(RecordType):
+    """A Subclass the of the RecordType class.
+
+    This defines the precise index or slice for information in
+    records of type A.
+    """
     sender_index = 0
     receiver_index = 1
     datetime_index = -2
@@ -167,6 +181,11 @@ class RecordTypeA(RecordType):
 
 
 class RecordTypeB(RecordType):
+    """A Subclass the of the RecordType class.
+
+    This defines the precise index or slice for information in
+    records of type B.
+    """
     sender_index = 3
     receiver_index = 4
     datetime_index = 1
@@ -228,7 +247,7 @@ def convert_records_to_json(records):
         records - A list of Record objects.
 
     JSON encoded objects have different key names than their Record object
-    counterparts. The translation is as followings:
+    counterparts. The translation is as follows:
         record.sender    -> from
         record.receiver  -> to
         record.id        -> sid
@@ -256,8 +275,8 @@ def main(input_stream, output_stream):
     Errors are written to stderr.
 
     Arguments:
-        input_stream - file object with the CSV data.
-        output_stream - file object the JSON will be written to.
+        input_stream - a file object with the CSV data.
+        output_stream - a file object the JSON will be written to.
     """
     reader = csv.reader(input_stream)
 
