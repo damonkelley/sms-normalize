@@ -269,7 +269,7 @@ def convert_records_to_json(records):
 
     return json.dumps(dict_records, indent=2, sort_keys=True)
 
-def main(input_stream, output_stream):
+def main(input_stream=sys.stdin, output_stream=sys.stdout):
     """Parses the incoming CSV data and converts it to JSON.
 
     Errors are written to stderr.
@@ -300,4 +300,4 @@ def main(input_stream, output_stream):
 
 
 if __name__ == '__main__':
-    main(sys.stdin, sys.stdout)
+    main()
