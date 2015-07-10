@@ -4,8 +4,8 @@ import json
 import logging
 import sys
 
-import phonenumbers as pn
 import dateutil.parser as dateutil
+import phonenumbers as pn
 
 
 logging.basicConfig(stream=sys.stderr, format='[\033[0;31m%(levelname)s\033[0m] %(message)s')
