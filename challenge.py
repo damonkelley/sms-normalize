@@ -83,6 +83,14 @@ class RecordType(object):
     def _get_message(self):
         return ','.join(self.data[self.message_index])
 
+    def __add__(self, other):
+        self.message = '{} {}'.format(self.message, other.message)
+        return self
+
+    def __repr__(self):
+        return '<{0}: {1} | {2}>'.format(
+            self.__class__.__name__, self.id, self.message)
+
 
 class RecordTypeA(RecordType):
     sender_index = 0
