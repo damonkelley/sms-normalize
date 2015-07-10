@@ -8,7 +8,8 @@ import dateutil.parser as dateutil
 import phonenumbers as pn
 
 
-logging.basicConfig(stream=sys.stderr, format='[\033[0;31m%(levelname)s\033[0m] %(message)s')
+logging.basicConfig(
+    stream=sys.stderr, format='[\033[0;31m%(levelname)s\033[0m] %(message)s')
 
 DEFAULT_REGION = 'US'
 
@@ -206,13 +207,14 @@ def create_record(data):
     new object.
     """
     # Get the first two items and throw away the rest.
-    sender, receiver, *rest = data
+    sender, receiver, *rest = data  # noqa
 
     # Use RecordTypeA if the first two element are valid phone numbers.
     if is_valid_phonenumber(sender) and is_valid_phonenumber(receiver):
         return RecordTypeA(data)
 
     return RecordTypeB(data)
+
 
 def merge_common_records(records):
     """Merge record messages that share a common ID.
@@ -237,6 +239,7 @@ def merge_common_records(records):
             records = [r for r in records if r is record or r not in common]
 
     return records
+
 
 def convert_records_to_json(records):
     """Convert a list of Record objects to JSON.
@@ -268,6 +271,7 @@ def convert_records_to_json(records):
         dict_records.append(record_dict)
 
     return json.dumps(dict_records, indent=2, sort_keys=True)
+
 
 def main(input_stream=sys.stdin, output_stream=sys.stdout):
     """Parses the incoming CSV data and converts it to JSON.
