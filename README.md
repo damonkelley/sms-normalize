@@ -6,7 +6,9 @@ Python 3.3.x or Python 3.4.x
 
 ### Usage
 
-The script will read the CSV content from stdin and write the JSON to stdout. If it encounters an error, a message will be written to stderr.
+The script will read the CSV content from `stdin` and write the JSON to `stdout`. 
+
+If it encounters an error while parsing a record, that record is skipped and a message is logged to `stderr`.
 
 There are 2 ways to run the script.
 
