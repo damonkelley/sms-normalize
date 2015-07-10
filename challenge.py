@@ -1,10 +1,10 @@
 import csv
 
-import phonenumber as pn
+import phonenumbers as pn
 import dateutil.parser as dateutil
 
 
-DEFAUL_REGION = 'US'
+DEFAULT_REGION = 'US'
 
 
 def normalize_phonenumber(phonenumber):
@@ -13,48 +13,65 @@ def normalize_phonenumber(phonenumber):
     try:
         numobj = pn.parse(phonenumber)
     except pn.NumberParseException:
-        numobj = pn.parse(phonenumber, DEFAUL_REGION)
+        numobj = pn.parse(phonenumber, DEFAULT_REGION)
 
     return '{code}{national_num}'.format(
         code=numobj.country_code, national_num=numobj.national_number)
 
 
+def normalize_datetime(datestring):
+    dateobj = dateutil.parse(datestring)
+    return dateobj.replace(microsecond=0, tzinfo=None).isoformat()
+
+
+def normalize_message(message):
+    pass
+
+
 class RecordType(object):
-    column_map = []
+    sender_index = 0
+    receiver_index = 1
+    datetime_index = 2
+    id_index = 3
+    message_index = slice(4, None)
 
     def __init__(self, data):
-        self.data
+        self.data = data
+
+    def _phonenumber(self, index):
+        number = self.data[index]
+        return normalize_phonenumber(number)
 
     def _datetime(self):
-        pass
+        return normalize_datetime(self.data[self.datetime_index])
 
     @property
     def datetime(self):
         return self._datetime()
 
     def _id(self):
-        pass
+        return self.data[self.id_index]
 
     @property
     def id(self):
         return self._id()
 
     def _sender(self):
-        pass
+        return self._phonenumber(self.sender_index)
 
     @property
     def sender(self):
         return self._sender()
 
     def _receiver(self):
-        pass
+        return self._phonenumber(self.receiver_index)
 
     @property
     def receiver(self):
         return self._receiver()
 
     def _message(self):
-        pass
+        return ','.join(self.data[self.message_index])
 
     @property
     def message(self):
@@ -62,45 +79,23 @@ class RecordType(object):
 
 
 class RecordTypeA(RecordType):
-    column_map = ['sender', 'receiver', 'message', 'datetime', 'id']
-
-    def _sender(self):
-        number = self.data[0]
-        return normalize_phonenumber(number)
-
-    def _receiver(self):
-        number = self.data[1]
-        return normalize_phonenumber(number)
-
-    def _id(self):
-        return self.data[-1]
-
-    def _datetime(self):
-        return dateutil.parse(self.data[-2])
-
-    def _message(self):
-        return ','.join(self.data[2:-2])
+    sender_index = 0
+    receiver_index = 1
+    datetime_index = -2
+    message_index = slice(2, -2)
+    id_index = -1
 
 
 class RecordTypeB(RecordType):
-    column_map = ['datetime', 'id', 'sender', 'receiver', 'message']
+    sender_index = 3
+    receiver_index = 4
+    datetime_index = 1
+    message_index = slice(5, None)
+    id_index = 2
 
-    def _sender(self):
-        number = self.data[3]
-        return normalize_phonenumber(number)
 
-    def _receiver(self):
-        number = self.data[4]
-        return normalize_phonenumber(number)
-
-    def _id(self):
-        return self.data[2]
-
-    def _datetime(self):
-        return dateutil.parse(self.data[:2])
-
-    def _message(self):
-        return ','.join(self.data[5:])
+class Record(object):
+    pass
 
 
 class Normalizer(object):
