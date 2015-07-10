@@ -1,3 +1,4 @@
+import json
 from unittest import mock
 
 import pytest
@@ -174,3 +175,96 @@ class TestCreateRecord:
         assert mock_record_b.call_count == 1
         assert mock_record_a.call_count == 0
         mock_record_b.assert_called_with_args(test_data)
+
+
+class TestMergeCommonRecords:
+    test_data1 = [
+        'Mon',
+        'Jun 22 2015 09:12:45 GMT',
+        '4125425345',
+        '+49231971134',
+        '+12129876543',
+        'Message A.'
+    ]
+    test_data2 = [
+        'Mon',
+        'Jun 22 2015 09:12:45 GMT',
+        '4125425345',
+        '+49231971134',
+        '+12129876543',
+        ' Message B.'
+    ]
+
+    test_data3 = [
+        '(212) 452-1214',
+        '(415) 999-1234',
+        'This is a sample text',
+        '2015-04-23 04:55:12',
+        '00a12df6'
+    ]
+
+    def test_messages_are_concatenated(self):
+        records = [
+            challenge.RecordTypeB(self.test_data1),
+            challenge.RecordTypeB(self.test_data2)
+        ]
+
+        records = challenge.merge_common_records(records)
+
+        assert len(records) == 1
+
+        record = records.pop()
+        assert record.message == 'Message A. Message B.'
+
+    def test_merged_records_are_filtered_out(self):
+        records = [
+            challenge.RecordTypeB(self.test_data1),
+            challenge.RecordTypeB(self.test_data2),
+            challenge.RecordTypeA(self.test_data3)
+        ]
+
+        records = challenge.merge_common_records(records)
+
+        assert len(records) == 2
+
+
+class TestConvertRecordsToJson:
+    test_data1 = [
+        'Mon',
+        'Jun 22 2015 09:12:45 GMT',
+        '4125425345',
+        '+49231971134',
+        '+12129876543',
+        'Message A.'
+    ]
+    test_data2 = [
+        '(212) 452-1214',
+        '(415) 999-1234',
+        'This is a sample text',
+        '2015-04-23 04:55:12',
+        '00a12df6'
+    ]
+
+    def test_output(self):
+        records = [
+            challenge.RecordTypeB(self.test_data1),
+            challenge.RecordTypeA(self.test_data2)
+        ]
+
+        output = json.loads(challenge.convert_records_to_json(records))
+
+        assert len(output) == 2
+
+        record1 = output.pop(0)
+        assert record1.get('from', False)
+        assert record1.get('to', False)
+        assert record1.get('sid', False)
+        assert record1.get('message', False)
+        assert record1.get('time', False)
+
+        record2 = output.pop()
+        assert record2.get('from', False)
+        assert record2.get('to', False)
+        assert record2.get('sid', False)
+        assert record2.get('message', False)
+        assert record2.get('time', False)
