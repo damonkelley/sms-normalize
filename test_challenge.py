@@ -49,7 +49,7 @@ class TestNormalizePhonenumber:
         (9121345813, '19121345813'),
         ('+6433512345', '6433512345'),
         ('+12129876543', '12129876543'),
-        # TODO: add () num-num format
+        ('(212) 987-6543', '12129876543'),
     ])
     def test_output(self, number, expected):
         assert challenge.normalize_phonenumber(number) == expected
@@ -57,7 +57,6 @@ class TestNormalizePhonenumber:
 
 class TestIsValidPhonenumber:
 
-    # TODO: Break this out into multiple tests.
     @pytest.mark.parametrize('number, expected', [
         ('1111111111', False),
         ('4125425345', True),
@@ -245,7 +244,7 @@ class TestConvertRecordsToJson:
         '00a12df6'
     ]
 
-    def test_output(self):
+    def test_json_output(self):
         records = [
             challenge.RecordTypeB(self.test_data1),
             challenge.RecordTypeA(self.test_data2)
