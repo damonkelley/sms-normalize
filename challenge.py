@@ -7,14 +7,35 @@ import dateutil.parser as dateutil
 DEFAULT_REGION = 'US'
 
 
-def normalize_phonenumber(phonenumber):
+class PhoneNumberParseError(Exception):
+    pass
+
+
+def _create_phonenumber(phonenumber):
     phonenumber = str(phonenumber)
 
     try:
-        numobj = pn.parse(phonenumber)
+        return pn.parse(phonenumber)
     except pn.NumberParseException:
-        numobj = pn.parse(phonenumber, DEFAULT_REGION)
+        pass
 
+    try:
+        return pn.parse(phonenumber, DEFAULT_REGION)
+    except pn.NumberParseException:
+        raise PhoneNumberParseError('Unable to parse the phone number.')
+
+
+def is_valid_phonenumber(phonenumber):
+    try:
+        numobj = _create_phonenumber(phonenumber)
+    except PhoneNumberParseError:
+        return False
+
+    return pn.is_valid_number(numobj)
+
+
+def normalize_phonenumber(phonenumber):
+    numobj = _create_phonenumber(phonenumber)
     return '{code}{national_num}'.format(
         code=numobj.country_code, national_num=numobj.national_number)
 
@@ -37,45 +58,30 @@ class RecordType(object):
 
     def __init__(self, data):
         self.data = data
+        self.id = self._get_id()
+        self.message = self._get_message()
+        self.sender = self._get_sender()
+        self.receiver = self._get_receiver()
+        self.datetime = self._get_datetime()
 
     def _phonenumber(self, index):
         number = self.data[index]
         return normalize_phonenumber(number)
 
-    def _datetime(self):
+    def _get_datetime(self):
         return normalize_datetime(self.data[self.datetime_index])
 
-    @property
-    def datetime(self):
-        return self._datetime()
-
-    def _id(self):
+    def _get_id(self):
         return self.data[self.id_index]
 
-    @property
-    def id(self):
-        return self._id()
-
-    def _sender(self):
+    def _get_sender(self):
         return self._phonenumber(self.sender_index)
 
-    @property
-    def sender(self):
-        return self._sender()
-
-    def _receiver(self):
+    def _get_receiver(self):
         return self._phonenumber(self.receiver_index)
 
-    @property
-    def receiver(self):
-        return self._receiver()
-
-    def _message(self):
+    def _get_message(self):
         return ','.join(self.data[self.message_index])
-
-    @property
-    def message(self):
-        return self._message()
 
 
 class RecordTypeA(RecordType):
@@ -94,21 +100,11 @@ class RecordTypeB(RecordType):
     id_index = 2
 
 
-class Record(object):
-    pass
+def create_record(data):
+    # Get the first two items and throw away the rest.
+    sender, receiver, *rest = data
 
+    if is_valid_phonenumber(sender) and is_valid_phonenumber(receiver):
+        return RecordTypeA(data)
 
-class Normalizer(object):
-
-    def __init__(self):
-        self.normalized_records = []
-
-    def normalize_row(self, row):
-        pass
-
-    @classmethod
-    def normalize(cls, fileobj):
-        n = cls()
-
-        for row in csv.reader(fileobj):
-            n.normalize_row(row)
+    return RecordTypeB(data)
