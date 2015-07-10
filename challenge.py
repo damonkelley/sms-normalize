@@ -1,4 +1,6 @@
 import csv
+from functools import reduce
+import json
 
 import phonenumbers as pn
 import dateutil.parser as dateutil
@@ -116,3 +118,44 @@ def create_record(data):
         return RecordTypeA(data)
 
     return RecordTypeB(data)
+
+def merge_common_records(records):
+    for record in records:
+        common = [r for r in records if r.id == record.id]
+
+        if len(common) > 1:
+            record = reduce(lambda r1, r2: r1 + r2, common)
+
+            records = [r for r in records if r is record or r not in common]
+
+    return records
+
+def convert_records_to_json(records):
+    dict_records = []
+
+    for record in records:
+        record_dict = {
+            'from': record.sender,
+            'to': record.receiver,
+            'sid': record.id,
+            'message': record.message,
+            'time': record.datetime
+        }
+
+        dict_records.append(record_dict)
+
+    return json.dumps(dict_records, indent=2, sort_keys=True)
+
+def main(input_stream, output_stream):
+    reader = csv.reader(input_stream)
+
+    records = [create_record(row) for row in reader]
+    records = merge_common_records(records)
+    json_records = convert_records_to_json(records)
+
+    output_stream.write(json_records)
+
+
+if __name__ == '__main__':
+    import sys
+    main(sys.stdin, sys.stdout)
