@@ -1,3 +1,4 @@
+from io import StringIO
 import json
 from unittest import mock
 
@@ -69,6 +70,27 @@ class TestIsValidPhonenumber:
     ])
     def test_numbers(self, number, expected):
         assert challenge.is_valid_phonenumber(number) == expected
+
+
+class TestNormalizeDatetime:
+
+    def test_return_type_is_string(self):
+        result = challenge.normalize_datetime('2015-01-01')
+        assert type(result) is str
+
+    def test_return_value(self):
+        result = challenge.normalize_datetime('2015-01-01')
+        assert result == '2015-01-01T00:00:00'
+
+    def test_converts_gmt_string(self):
+        datestring = 'Mon, Jun 22 2015 09:12:45 GMT'
+        result = challenge.normalize_datetime(datestring)
+        assert result == '2015-06-22T09:12:45'
+
+    def test_converts_gmt_string_without_day(self):
+        datestring = 'Jun 22 2015 09:12:45 GMT'
+        result = challenge.normalize_datetime(datestring)
+        assert result == '2015-06-22T09:12:45'
 
 
 class TestRecordType:
@@ -225,6 +247,8 @@ class TestMergeCommonRecords:
         records = challenge.merge_common_records(records)
 
         assert len(records) == 2
+        assert isinstance(records.pop(), challenge.RecordTypeA)
+        assert isinstance(records.pop(), challenge.RecordTypeB)
 
 
 class TestConvertRecordsToJson:
@@ -267,3 +291,15 @@ class TestConvertRecordsToJson:
         assert record2.get('sid', False)
         assert record2.get('message', False)
         assert record2.get('time', False)
+
+
+class TestMain:
+
+    def test_main(self):
+        output_stream = StringIO()
+        with open('test_data/input.csv') as f:
+            challenge.main(f, output_stream)
+
+        results = json.loads(output_stream.getvalue())
+        assert type(results) is list
+        assert len(results) == 6
