@@ -5,43 +5,43 @@ from unittest import mock
 import pytest
 import phonenumbers
 
-import challenge
+import sanitize
 
 
 class TestCreatePhonenumber:
 
     def test_number_with_country_code(self):
-        numobj = challenge._create_phonenumber('+63490941094')
+        numobj = sanitize._create_phonenumber('+63490941094')
         assert isinstance(numobj, phonenumbers.PhoneNumber)
 
     def test_number_without_country_code_is_parsed_correctly(self):
-        numobj = challenge._create_phonenumber('2608941966')
+        numobj = sanitize._create_phonenumber('2608941966')
         assert isinstance(numobj, phonenumbers.PhoneNumber)
 
     def test_accepts_numeric_number(self):
-        numobj = challenge._create_phonenumber(2608941966)
+        numobj = sanitize._create_phonenumber(2608941966)
         assert isinstance(numobj, phonenumbers.PhoneNumber)
 
     def test_raises_exception_with_invalid_string(self):
-        with pytest.raises(challenge.PhoneNumberParseError):
-            challenge._create_phonenumber('abcdefghij')
+        with pytest.raises(sanitize.PhoneNumberParseError):
+            sanitize._create_phonenumber('abcdefghij')
 
 
 class TestNormalizePhonenumber:
-    """Tests for challenge.normalize_phonenumber."""
+    """Tests for sanitize.normalize_phonenumber."""
 
     def test_number_with_country_code_is_parsed_correctly(self):
-        assert challenge.normalize_phonenumber('+63490941094') == '63490941094'
+        assert sanitize.normalize_phonenumber('+63490941094') == '63490941094'
 
     def test_number_without_country_code_is_parsed_correctly(self):
-        assert challenge.normalize_phonenumber('2608941966') == '12608941966'
+        assert sanitize.normalize_phonenumber('2608941966') == '12608941966'
 
     def test_accepts_numeric_number(self):
-        assert challenge.normalize_phonenumber(2608941966) == '12608941966'
+        assert sanitize.normalize_phonenumber(2608941966) == '12608941966'
 
     def test_raises_exception_with_invalid_string(self):
-        with pytest.raises(challenge.PhoneNumberParseError):
-            challenge.normalize_phonenumber('abcdefghij')
+        with pytest.raises(sanitize.PhoneNumberParseError):
+            sanitize.normalize_phonenumber('abcdefghij')
 
     @pytest.mark.parametrize('number, expected', [
         ('1111111111', '1111111111'),
@@ -53,7 +53,7 @@ class TestNormalizePhonenumber:
         ('(212) 987-6543', '12129876543'),
     ])
     def test_output(self, number, expected):
-        assert challenge.normalize_phonenumber(number) == expected
+        assert sanitize.normalize_phonenumber(number) == expected
 
 
 class TestIsValidPhonenumber:
@@ -69,27 +69,27 @@ class TestIsValidPhonenumber:
         ('00a12df6', False),
     ])
     def test_numbers(self, number, expected):
-        assert challenge.is_valid_phonenumber(number) == expected
+        assert sanitize.is_valid_phonenumber(number) == expected
 
 
 class TestNormalizeDatetime:
 
     def test_return_type_is_string(self):
-        result = challenge.normalize_datetime('2015-01-01')
+        result = sanitize.normalize_datetime('2015-01-01')
         assert type(result) is str
 
     def test_return_value(self):
-        result = challenge.normalize_datetime('2015-01-01')
+        result = sanitize.normalize_datetime('2015-01-01')
         assert result == '2015-01-01T00:00:00'
 
     def test_converts_gmt_string(self):
         datestring = 'Mon, Jun 22 2015 09:12:45 GMT'
-        result = challenge.normalize_datetime(datestring)
+        result = sanitize.normalize_datetime(datestring)
         assert result == '2015-06-22T09:12:45'
 
     def test_converts_gmt_string_without_day(self):
         datestring = 'Jun 22 2015 09:12:45 GMT'
-        result = challenge.normalize_datetime(datestring)
+        result = sanitize.normalize_datetime(datestring)
         assert result == '2015-06-22T09:12:45'
 
 
@@ -103,23 +103,23 @@ class TestRecordType:
     ]
 
     def test__get_id(self):
-        record = challenge.RecordType(self.test_data)
+        record = sanitize.RecordType(self.test_data)
         assert record._get_id() == '00a12df6'
 
     def test__get_datetime(self):
-        record = challenge.RecordType(self.test_data)
+        record = sanitize.RecordType(self.test_data)
         assert record._get_datetime() == '2015-04-23T04:55:12'
 
     def test__get_message(self):
-        record = challenge.RecordType(self.test_data)
+        record = sanitize.RecordType(self.test_data)
         assert record._get_message() == 'This is a sample text.'
 
     def test__get_sender(self):
-        record = challenge.RecordType(self.test_data)
+        record = sanitize.RecordType(self.test_data)
         assert record._get_sender() == '12124521214'
 
     def test__get_receiver(self):
-        record = challenge.RecordType(self.test_data)
+        record = sanitize.RecordType(self.test_data)
         assert record._get_receiver() == '14159991234'
 
 
@@ -133,7 +133,7 @@ class TestRecordTypeA:
     ]
 
     def test_initialized_correctly(self):
-        record = challenge.RecordTypeA(self.test_data)
+        record = sanitize.RecordTypeA(self.test_data)
         assert record.id == '00a12df6'
         assert record.datetime == '2015-04-23T04:55:12'
         assert record.message == 'This is a sample text'
@@ -152,7 +152,7 @@ class TestRecordTypeB:
     ]
 
     def test_initialized_correctly(self):
-        record = challenge.RecordTypeB(self.test_data)
+        record = sanitize.RecordTypeB(self.test_data)
         assert record.id == '4125425345'
         assert record.datetime == '2015-06-22T09:12:45'
         assert record.message == 'This is a part 2 of a multipart message'
@@ -162,8 +162,8 @@ class TestRecordTypeB:
 
 class TestCreateRecord:
 
-    @mock.patch('challenge.RecordTypeA')
-    @mock.patch('challenge.RecordTypeB')
+    @mock.patch('sanitize.RecordTypeA')
+    @mock.patch('sanitize.RecordTypeB')
     def test_returns_record_type_a(self, mock_record_b, mock_record_a):
         test_data = [
             '(212) 452-1214',
@@ -173,14 +173,14 @@ class TestCreateRecord:
             '00a12df6'
         ]
 
-        challenge.create_record(test_data)
+        sanitize.create_record(test_data)
 
         assert mock_record_a.call_count == 1
         assert mock_record_b.call_count == 0
         mock_record_a.assert_called_with(test_data)
 
-    @mock.patch('challenge.RecordTypeA')
-    @mock.patch('challenge.RecordTypeB')
+    @mock.patch('sanitize.RecordTypeA')
+    @mock.patch('sanitize.RecordTypeB')
     def test_creates_record_type_b(self, mock_record_b, mock_record_a):
         test_data = [
             'Mon',
@@ -191,7 +191,7 @@ class TestCreateRecord:
             'This is a part 2 of a multipart message'
         ]
 
-        challenge.create_record(test_data)
+        sanitize.create_record(test_data)
 
         assert mock_record_b.call_count == 1
         assert mock_record_a.call_count == 0
@@ -226,11 +226,11 @@ class TestMergeCommonRecords:
 
     def test_messages_are_concatenated(self):
         records = [
-            challenge.RecordTypeB(self.test_data1),
-            challenge.RecordTypeB(self.test_data2)
+            sanitize.RecordTypeB(self.test_data1),
+            sanitize.RecordTypeB(self.test_data2)
         ]
 
-        records = challenge.merge_common_records(records)
+        records = sanitize.merge_common_records(records)
 
         assert len(records) == 1
 
@@ -239,16 +239,16 @@ class TestMergeCommonRecords:
 
     def test_merged_records_are_filtered_out(self):
         records = [
-            challenge.RecordTypeB(self.test_data1),
-            challenge.RecordTypeB(self.test_data2),
-            challenge.RecordTypeA(self.test_data3)
+            sanitize.RecordTypeB(self.test_data1),
+            sanitize.RecordTypeB(self.test_data2),
+            sanitize.RecordTypeA(self.test_data3)
         ]
 
-        records = challenge.merge_common_records(records)
+        records = sanitize.merge_common_records(records)
 
         assert len(records) == 2
-        assert isinstance(records.pop(), challenge.RecordTypeA)
-        assert isinstance(records.pop(), challenge.RecordTypeB)
+        assert isinstance(records.pop(), sanitize.RecordTypeA)
+        assert isinstance(records.pop(), sanitize.RecordTypeB)
 
 
 class TestConvertRecordsToJson:
@@ -270,11 +270,11 @@ class TestConvertRecordsToJson:
 
     def test_json_output(self):
         records = [
-            challenge.RecordTypeB(self.test_data1),
-            challenge.RecordTypeA(self.test_data2)
+            sanitize.RecordTypeB(self.test_data1),
+            sanitize.RecordTypeA(self.test_data2)
         ]
 
-        output = json.loads(challenge.convert_records_to_json(records))
+        output = json.loads(sanitize.convert_records_to_json(records))
 
         assert len(output) == 2
 
@@ -298,7 +298,7 @@ class TestMain:
     def test_main(self):
         output_stream = StringIO()
         with open('test_data/input.csv') as f:
-            challenge.main(f, output_stream)
+            sanitize.main(f, output_stream)
 
         results = json.loads(output_stream.getvalue())
         assert type(results) is list
