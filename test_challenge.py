@@ -177,7 +177,7 @@ class TestCreateRecord:
 
         assert mock_record_a.call_count == 1
         assert mock_record_b.call_count == 0
-        mock_record_a.assert_called_with_args(test_data)
+        mock_record_a.assert_called_with(test_data)
 
     @mock.patch('challenge.RecordTypeA')
     @mock.patch('challenge.RecordTypeB')
@@ -195,7 +195,7 @@ class TestCreateRecord:
 
         assert mock_record_b.call_count == 1
         assert mock_record_a.call_count == 0
-        mock_record_b.assert_called_with_args(test_data)
+        mock_record_b.assert_called_with(test_data)
 
 
 class TestMergeCommonRecords:

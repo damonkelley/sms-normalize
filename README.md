@@ -2,7 +2,7 @@
 
 ### Requirements
 
-Python 3.3.x or Python 3.4.x
+Python 3.3 - 3.5
 
 ### Usage
 
@@ -39,6 +39,7 @@ $ cat foo.csv | python challenge.py
 To run the tests, first install the test requirements.
 ```sh
 $ pip install -r requirements.txt
+$ pip install -r requirements-test.txt
 ```
 
 Start testing.
