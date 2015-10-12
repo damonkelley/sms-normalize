@@ -8,7 +8,7 @@ setup(
     author='Damon Kelley',
     author_email='damon.kelley@gmail.com',
     url='https://github.com/damonkelley/sms-normalize',
-    py_modules=['sanitize'],
+    py_modules=['smsnormalize'],
     include_package_data=True,
     description='CSV SMS records to normalized JSON',
     install_requires=['phonenumbers', 'python-dateutil'],
