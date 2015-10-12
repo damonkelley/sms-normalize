@@ -1,4 +1,4 @@
-# sms-sanitize
+# sms-normalize
 
 ### Requirements
 
@@ -19,10 +19,10 @@ There are 2 ways to run the script.
 ```sh
 $ python setup.py install
 
-$ cat foo.csv | sms-santize
+$ cat foo.csv | sms-normalize
 
 # Ignore the error output
-$ cat foo.csv | sms-santize 2> /dev/null
+$ cat foo.csv | sms-normalize 2> /dev/null
 ```
 
 ##### Method 2: Run the script directly.
@@ -31,7 +31,7 @@ $ cat foo.csv | sms-santize 2> /dev/null
 # Install the dependencies.
 $ pip install -r requirements.txt
 
-$ cat foo.csv | python sanitize.py
+$ cat foo.csv | python smsnormalize.py
 ```
 
 #### Tests
